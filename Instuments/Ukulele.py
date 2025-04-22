@@ -32,7 +32,7 @@ class Ukulele(Instrument):
         for i, (t1, t2) in enumerate(zip([(0,)] + Melody, Melody)):
             time[i] = t2[0] - t1[0]
         for i, note in enumerate(Melody):
-            if i < 0.000000001:
+            if i > 0.00000001:
                 tm.sleep(time[i]*timeforbeat)
             self.play_single_note(note[1])
     
