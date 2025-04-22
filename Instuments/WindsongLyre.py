@@ -20,19 +20,19 @@ class WindsongLyre(Instrument):
     def __key_map(self, note: str) -> str:
         return self.__key_map__[note]
         
-    def play(self, Melody: list[(float, str)], bpm: int):
+    def play(self, melody: list[(float, str)], bpm: int):
         """plays the melody use windsong lyre
 
         Args:
-            Melody (list[(time: float, note: str)]): the list must be sorted by time
+            melody (list[(time: float, note: str)]): the list must be sorted by time
             bpm (int): beats per minute
         """
         timeforbeat = 60/bpm
-        time = [0] * len(Melody)
-        for i, (t1, t2) in enumerate(zip([(0,)] + Melody, Melody)):
-            time[i] = t2[0] - t1[0]
-        for i, note in enumerate(Melody):
-            if i:
+        time = []
+        for t1, t2 in zip([(0,)] + melody, melody):
+            time.append(t2[0] - t1[0])
+        for i, note in enumerate(melody):
+            if time[i] > 0.00000001:
                 tm.sleep(time[i]*timeforbeat)
             self.play_single_note(note[1])
     
