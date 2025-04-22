@@ -7,6 +7,6 @@ class Instrument:
         self.game = game
     
     @abstractmethod
-    def play(self, Melody: list[int]):
+    def play(self, melody: list[int]):
         pass
     
