@@ -2,6 +2,7 @@ import unittest
 from Game import Game
 from unittest.mock import patch
 from Instuments import WindsongLyre
+from Instuments import Ukulele
 
 class TestInstuments(unittest.TestCase):
     pass
@@ -41,4 +42,38 @@ class TestWindsongLyre(unittest.TestCase):
         sleep_time = mock_sleep.call_args_list[0][0][0]
         self.assertAlmostEqual(sleep_time, 0.5, places=5)
         
+class TestUkulele(unittest.TestCase):
+    
+    @patch.object(Game, "__init__", lambda self: None)
+    def setUp(self):
+        self.ukulele = Ukulele.Ukulele(Game())
+    
+    def tearDown(self):
+        del self.ukulele
+        
+    @patch.object(Game, "key_press")
+    @patch.object(Game, "key_release")
+    @patch.object(Ukulele.Ukulele, "_Ukulele__key_map", lambda self, note: note)
+    def test_play_single_note(self, mock_key_release, mock_key_press):
+        notes = [i + j for j in "456" for i in "cdefgabCDEFGAB"]
+        for note in notes:
+            self.ukulele.play_single_note(note)
+            mock_key_press.assert_called_with(note)
+            mock_key_release.assert_called_with(note)
+            
+    def test_play_single_note_not_exist(self):
+        try:
+            self.ukulele.play_single_note("C4")
+        except Exception as e:
+            self.assertIsInstance(e, KeyError)
+
+    @patch("time.sleep")
+    @patch.object(Ukulele.Ukulele, "play_single_note")
+    def test_play(self, mock_play_single_note, mock_sleep):
+        melody = [(0, "G7"), (0.5, "Am")]
+        self.ukulele.play(melody, 60)
+        mock_play_single_note.assert_any_call("G7")
+        self.assertEqual(len(mock_sleep.call_args_list), 1)
+        sleep_time = mock_sleep.call_args_list[0][0][0]
+        self.assertAlmostEqual(sleep_time, 0.5, places=5)
         
