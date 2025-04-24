@@ -14,7 +14,6 @@ def midi_to_melody(file_path) -> list[(float, str, bool)]:
     ret = []
     mid = MidiFile(file_path)
     cur = 0.0
-    print(len(mid.tracks))
     for msg in mid.tracks[3]:
         cur += msg.time
         
