@@ -1,6 +1,5 @@
 from tkinter import Frame, Label, Button
 from .FileSelector import FileSelector
-import threading
 
 class FilePage(Frame):
     def __init__(self, master, on_play=None, on_pause=None, on_resume=None, on_stop=None):
