@@ -14,7 +14,7 @@ class Instrument:
     def __key_map(self, note: str) -> str:
         return self.__key_map__.get(note, "None")
         
-    def play(self, melody, bpm):
+    def play_new_thread(self, melody: list[(float, str, bool)], bpm: float):
         if self._play_thread and self._play_thread.is_alive():
             return
             
@@ -24,9 +24,15 @@ class Instrument:
             target=self._play_melody,
             args=(melody, bpm)
         )
+        self._play_thread.daemon = True
         self._play_thread.start()
 
-    def _play_melody(self, melody, bpm):
+    def play(self, melody: list[(float, str, bool)], bpm: float):
+        self._stop_playback = False
+        self._play_event.set()
+        self._play_melody(melody, bpm)
+
+    def _play_melody(self, melody: list[(float, str, bool)], bpm: float):
         time_per_beat = 60 / bpm
         prev_time = 0
 
@@ -46,6 +52,7 @@ class Instrument:
                     self.game.key_press(key)
                 else:
                     self.game.key_release(key)
+        self._play_thread = None
 
     def pause(self):
         self._play_event.clear()
@@ -58,3 +65,4 @@ class Instrument:
         self._play_event.set()
         if self._play_thread:
             self._play_thread.join()
+            self._play_thread = None
