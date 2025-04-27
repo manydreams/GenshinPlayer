@@ -2,7 +2,10 @@ from GUI.Viewer import Viewer
 from GUI.FilePage import FilePage
 from Instuments.WindsongLyre import WindsongLyre
 from Game import Game
+from tkinter import simpledialog
+from tkinter import Tk
 import trans
+
 
 class GenshinPlayer:
     def __init__(self):
@@ -18,15 +21,31 @@ class GenshinPlayer:
             on_pause=self._handle_pause,
             on_resume=self._handle_resume,
             on_stop=self._handle_stop,
+            on_bpm_change=self._handle_bpm_change,
+            on_offset_change=self._handle_offset_change,
+            update_melody=self._handle_melody_change
         )
         self.window.add_page(self.file_page, "Music Player")
         self.window.show_page(0)
+        self.current_bpm = 120
+        self.current_offset = 0
 
-    def _handle_play(self, file_path):
+    def _handle_bpm_change(self, bpm):
+        """Handle BPM parameter change"""
+        self.current_bpm = bpm
+
+    def _handle_offset_change(self, offset):
+        """Handle offset parameter change"""
+        self.current_offset = offset
+        
+    def _handle_melody_change(self, melody):
+        """Handle melody change"""
+        self.melody = melody
+
+    def _handle_play(self):
         """Handle play button click"""
-        self.melody = trans.midi_to_melody(file_path)
         self.game.show_window()
-        self.windsong_lyre.play(self.melody, 86)
+        self.windsong_lyre.play_new_thread(self.melody, self.current_bpm)
 
     def _handle_pause(self):
         """Handle pause button click"""
