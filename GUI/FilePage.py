@@ -1,9 +1,10 @@
-from tkinter import Frame, Label, Button, Scale, Entry
+from tkinter import Frame, Label, Button, Entry, ttk
 from .FileSelector import FileSelector
 
 import trans
 import tkinter as tk
 import os
+import json
 
 class FilePage(Frame):
     def __init__(self, master, on_play=None, on_pause=None, on_resume=None, on_stop=None, on_bpm_change=None, on_offset_change=None, update_melody=None):
@@ -82,33 +83,52 @@ class FilePage(Frame):
 
     def _handle_file_select(self, file_path: str):
         """Handle file selection"""
-        if os.path.isfile(file_path) and file_path.lower().endswith('.mid'):
-            try:
-                # Parse and store melody data with current offset
-                melody_data = trans.midi_to_lyre(file_path, self.current_offset)
-                if melody_data and 'bpm' in melody_data and melody_data['bpm']:
-                    self.bpm_entry.delete(0, tk.END)
-                    self.bpm_entry.insert(0, str(melody_data['bpm']))
-                    self._update_bpm()
-                if melody_data and'melody' in melody_data and melody_data['melody']:
-                    self.update_melody(melody_data['melody'])
-                
-                self.selected_file = file_path
-                self.status_label.config(text=f"Selected: {file_path}")
+        if os.path.isfile(file_path):
+            bpm = None
+            melody = None
+            instrument = None
+            if file_path.lower().endswith(('.mid', '.midi')):
+                try:
+                    # Parse and store melody data with current offset
+                    melody_data = trans.midi_to_lyre(file_path, self.current_offset)
+                    if melody_data and 'bpm' in melody_data and melody_data['bpm']:
+                        bpm = melody_data['bpm']
+                    if melody_data and'melody' in melody_data and melody_data['melody']:
+                        melody = melody_data['melody']
+                    self.instrument_combobox.current(2)
+                    self.instrument_combobox.config(state="normal")
+                    self._update_instrument()
+                except Exception as e:
+                    print(f"Error processing MIDI file: {e}")
+            elif file_path.lower().endswith('json'):
+                try:
+                    with open(file_path, 'r') as f:
+                        lyre_config = json.load(f)
+                    if 'bpm' in lyre_config and lyre_config['bpm']:
+                        bpm = lyre_config['bpm']
+                    if 'melody' in lyre_config and lyre_config['melody']:
+                        melody = lyre_config['melody']
+                except Exception as e:
+                    print("Error loading music score:", e)
+            
+            if bpm:
+                self.bpm_entry.delete(0, tk.END)
+                self.bpm_entry.insert(0, str(bpm))
+                self._update_bpm()
+            if melody:
+                self.update_melody(melody)
+
+            
+            self.selected_file = file_path
+            self.status_label.config(text=f"Selected: {file_path}")
+            if bpm and melody:
                 self.play_btn.config(state="normal")
-                self.pause_btn.config(state="disabled")
-                self.resume_btn.config(state="disabled")
-                self.on_stop()
-                self.is_playing = False
-            except Exception as e:
-                print(f"Error processing MIDI file: {e}")
-                self.selected_file = file_path
-                self.status_label.config(text=f"Selected: {file_path}")
+            else:
                 self.play_btn.config(state="disabled")
-                self.pause_btn.config(state="disabled")
-                self.resume_btn.config(state="disabled")
-                self.on_stop()
-                self.is_playing = False
+            self.pause_btn.config(state="disabled")
+            self.resume_btn.config(state="disabled")
+            self.on_stop()
+            self.is_playing = False
 
     def _handle_play(self):
         """Handle play button click"""
@@ -145,8 +165,7 @@ class FilePage(Frame):
             if self.on_bpm_change:
                 self.on_bpm_change(value)
         except ValueError:
-            self.bpm_entry.delete(0, tk.END)
-            
+            self.bpm_entry.delete(0, tk.END)        
 
     def _update_offset(self):
         """Update offset parameter with validation"""

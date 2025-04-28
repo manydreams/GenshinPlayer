@@ -53,7 +53,7 @@ class FileSelector(Frame):
             files = os.listdir(directory)
             for file in sorted(files):
                 file_path = os.path.join(directory, file)
-                if os.path.isfile(file_path) and file.lower().endswith('.mid'):
+                if os.path.isfile(file_path) and file.lower().endswith(('.mid', '.midi', '.json')):
                     self.file_list.insert("end", file)
                     self.current_files.append(file)
         except (PermissionError, OSError) as e:
