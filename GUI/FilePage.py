@@ -7,7 +7,9 @@ import os
 import json
 
 class FilePage(Frame):
-    def __init__(self, master, on_play=None, on_pause=None, on_resume=None, on_stop=None, on_bpm_change=None, on_offset_change=None, update_melody=None):
+    def __init__(self, master, on_play=None, on_pause=None, on_resume=None,
+                 on_stop=None, on_bpm_change=None, on_offset_change=None,
+                 on_instrument_change=None, update_melody=None):
         super().__init__(master)
         self.on_play = on_play
         self.on_pause = on_pause
@@ -15,6 +17,7 @@ class FilePage(Frame):
         self.on_stop = on_stop
         self.on_bpm_change = on_bpm_change
         self.on_offset_change = on_offset_change
+        self.on_instrument_change = on_instrument_change
         self.update_melody = update_melody
         self.is_playing = False
         self.is_paused = False
@@ -52,6 +55,14 @@ class FilePage(Frame):
         self.offset_entry.pack(side="left", padx=5)
         self.offset_entry.bind("<Return>", lambda e: self._update_offset())
         self._update_offset()
+        
+        # Instrument control
+        Label(self.param_frame, text="Instrument:").pack(side="left")
+        self.instrument_combobox = ttk.Combobox(self.param_frame, values=["Nightwind Horn", "Ukulele", "Windsong Lyre"])
+        self.instrument_combobox.current(2)
+        self.instrument_combobox.pack(side="left", padx=5)
+        self.instrument_combobox.bind("<<ComboboxSelected>>", lambda e: self._update_instrument())
+        self._update_instrument()
 
         # Play/Pause/Resume buttons
         self.control_frame = Frame(self)
@@ -108,6 +119,12 @@ class FilePage(Frame):
                         bpm = lyre_config['bpm']
                     if 'melody' in lyre_config and lyre_config['melody']:
                         melody = lyre_config['melody']
+                    if 'instrument' in lyre_config and lyre_config['instrument']:
+                        instrument = lyre_config['instrument']
+                    if instrument:
+                        self.instrument_combobox.current(instrument)
+                        self.instrument_combobox.config(state="disabled")
+                        self._update_instrument()
                 except Exception as e:
                     print("Error loading music score:", e)
             
@@ -177,3 +194,12 @@ class FilePage(Frame):
         except ValueError:
             self.offset_entry.delete(0, "end")
             self.offset_entry.insert(0, str(self.current_offset))
+    
+    def _update_instrument(self):
+        """Update instrument parameter"""
+        try:
+            value = self.instrument_combobox.current()
+            if self.on_instrument_change:
+                self.on_instrument_change(value)
+        except ValueError:
+            pass
