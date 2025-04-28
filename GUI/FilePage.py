@@ -97,7 +97,6 @@ class FilePage(Frame):
         if os.path.isfile(file_path):
             bpm = None
             melody = None
-            instrument = None
             if file_path.lower().endswith(('.mid', '.midi')):
                 try:
                     # Parse and store melody data with current offset
@@ -119,14 +118,16 @@ class FilePage(Frame):
                         bpm = lyre_config['bpm']
                     if 'melody' in lyre_config and lyre_config['melody']:
                         melody = lyre_config['melody']
-                    if 'instrument' in lyre_config and lyre_config['instrument']:
-                        instrument = lyre_config['instrument']
-                    if instrument:
-                        self.instrument_combobox.current(instrument)
+                    
+                    if 'instrument' in lyre_config and lyre_config['instrument'] != None:
+                        self.instrument_combobox.current(lyre_config['instrument'])
                         self.instrument_combobox.config(state="disabled")
                         self._update_instrument()
                 except Exception as e:
                     print("Error loading music score:", e)
+                    self.instrument_combobox.current(2)
+                    self.instrument_combobox.config(state="normal")
+                    self._update_instrument()
             
             if bpm:
                 self.bpm_entry.delete(0, tk.END)
