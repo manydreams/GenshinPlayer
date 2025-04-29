@@ -9,15 +9,14 @@ import json
 
 class FilePage(Frame):
     def __init__(self, master, on_play=None, on_pause=None, on_resume=None,
-                 on_stop=None, on_bpm_change=None, on_offset_change=None,
-                 on_instrument_change=None, update_melody=None):
+                 on_stop=None, on_bpm_change=None, on_instrument_change=None,
+                 update_melody=None):
         super().__init__(master)
         self.on_play = on_play
         self.on_pause = on_pause
         self.on_resume = on_resume
         self.on_stop = on_stop
         self.on_bpm_change = on_bpm_change
-        self.on_offset_change = on_offset_change
         self.on_instrument_change = on_instrument_change
         self.update_melody = update_melody
         self.is_playing = False
@@ -193,9 +192,8 @@ class FilePage(Frame):
         try:
             value = int(self.offset_entry.get())
             self.current_offset = value
-            if self.on_offset_change:
-                self.on_offset_change(self.current_offset)
-            self._updata_melody()
+            if hasattr(self, 'selected_file') and self.selected_file.lower().endswith(('.mid', '.midi')):
+                self._updata_melody()
         except ValueError:
             self.offset_entry.delete(0, "end")
             self.offset_entry.insert(0, str(self.current_offset))
@@ -206,7 +204,8 @@ class FilePage(Frame):
             value = self.instrument_combobox.current()
             if self.on_instrument_change:
                 self.on_instrument_change(value)
-            self._updata_melody()
+            if hasattr(self, 'selected_file') and self.selected_file.lower().endswith(('.mid', '.midi')):
+                self._updata_melody()
         except ValueError:
             pass
     
