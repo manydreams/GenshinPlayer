@@ -27,7 +27,6 @@ class GenshinPlayer:
             on_resume=self._handle_resume,
             on_stop=self._handle_stop,
             on_bpm_change=self._handle_bpm_change,
-            on_offset_change=self._handle_offset_change,
             on_instrument_change=self._handle_instrument_change,
             update_melody=self._handle_melody_change
         )
@@ -39,15 +38,10 @@ class GenshinPlayer:
         
         self.window.show_page(0)
         self.current_bpm = 120
-        self.current_offset = 0
 
     def _handle_bpm_change(self, bpm):
         """Handle BPM parameter change"""
         self.current_bpm = bpm
-
-    def _handle_offset_change(self, offset):
-        """Handle offset parameter change"""
-        self.current_offset = offset
         
     def _handle_instrument_change(self, instrument):
         """Handle instrument change"""
