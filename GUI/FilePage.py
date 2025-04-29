@@ -1,5 +1,6 @@
 from tkinter import Frame, Label, Button, Entry, ttk
 from .FileSelector import FileSelector
+from Instuments.Types import Types
 
 import trans
 import tkinter as tk
@@ -139,7 +140,7 @@ class FilePage(Frame):
             
             self.selected_file = file_path
             self.status_label.config(text=f"Selected: {file_path}")
-            if bpm and melody:
+            if melody:
                 self.play_btn.config(state="normal")
             else:
                 self.play_btn.config(state="disabled")
@@ -178,6 +179,7 @@ class FilePage(Frame):
 
     def _update_bpm(self):
         """Update BPM parameter with validation"""
+        self.bpm_entry.master.focus_set()
         try:
             value = float(self.bpm_entry.get())
             if self.on_bpm_change:
@@ -187,11 +189,13 @@ class FilePage(Frame):
 
     def _update_offset(self):
         """Update offset parameter with validation"""
+        self.offset_entry.master.focus_set()
         try:
             value = int(self.offset_entry.get())
             self.current_offset = value
             if self.on_offset_change:
                 self.on_offset_change(self.current_offset)
+            self._updata_melody()
         except ValueError:
             self.offset_entry.delete(0, "end")
             self.offset_entry.insert(0, str(self.current_offset))
@@ -202,5 +206,21 @@ class FilePage(Frame):
             value = self.instrument_combobox.current()
             if self.on_instrument_change:
                 self.on_instrument_change(value)
+            self._updata_melody()
         except ValueError:
             pass
+    
+    def _updata_melody(self):
+        """Update melody data"""
+        if hasattr(self, 'selected_file') and self.selected_file:
+            match self.instrument_combobox.current():
+                case Types.Horn.value:
+                    melody_data = trans.midi_to_horn(self.selected_file, self.current_offset)
+                case Types.Ukulele.value:
+                    melody_data = trans.midi_to_ukulele(self.selected_file, self.current_offset)
+                case Types.Lyre.value:
+                    melody_data = trans.midi_to_lyre(self.selected_file, self.current_offset)
+                case _:
+                    pass
+            if melody_data and 'melody' in melody_data and melody_data['melody']:
+                self.update_melody(melody_data['melody'])
