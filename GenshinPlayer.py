@@ -1,5 +1,6 @@
 from GUI.Viewer import Viewer
 from GUI.FilePage import FilePage
+from GUI.TransPage import TransPage
 from Instuments.WindsongLyre import WindsongLyre
 from Instuments.Ukulele import Ukulele
 from Instuments.NightwindHorn import NightwindHorn
@@ -31,6 +32,11 @@ class GenshinPlayer:
             update_melody=self._handle_melody_change
         )
         self.window.add_page(self.file_page, "Music Player")
+        
+        # Add standalone trans page
+        self.trans_page = TransPage(self.window.page_container)
+        self.window.add_page(self.trans_page, "Translation")
+        
         self.window.show_page(0)
         self.current_bpm = 120
         self.current_offset = 0
