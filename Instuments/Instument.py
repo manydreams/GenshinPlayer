@@ -33,6 +33,7 @@ class Instrument:
         self._play_melody(melody, bpm)
 
     def _play_melody(self, melody: list[(float, str, bool)], bpm: float):
+        self._release_all_keys()
         time_per_beat = 60 / bpm
         prev_time = 0
 
@@ -53,14 +54,21 @@ class Instrument:
                 else:
                     self.game.key_release(key)
         self._play_thread = None
+        self._release_all_keys()
+
+    def _release_all_keys(self):
+        for key in self.__key_map__.values():
+            self.game.key_release(key)
 
     def pause(self):
         self._play_event.clear()
 
     def resume(self):
+        self._release_all_keys()
         self._play_event.set()
 
     def stop(self):
+        self._release_all_keys()
         self._stop_playback = True
         self._play_event.set()
         if self._play_thread:
