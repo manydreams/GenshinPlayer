@@ -23,14 +23,14 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_m
     mid = MidiFile(file_path)
     
     tempo = None
-    time_signature = None
+    time_signature = (4, 4)
     bpm = None
     
     for t in mid.tracks:
         cur = 0.0
         for msg in t:
             cur += msg.time
-            if msg.type == 'note_on' or msg.type == 'note_off':
+            if msg.type in ['note_on', 'note_off'] and msg.velocity > 0:
                 note = msg.note + offset
                 if note not in key_map:
                     continue
@@ -46,7 +46,7 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_m
             elif msg.type =='set_tempo' and tempo == None:
                 tempo = msg.tempo
                 
-    if tempo and time_signature:
+    if tempo:
         bpm = tempo2bpm(tempo, time_signature)
         
     ret.sort(key=lambda x: x[0])
