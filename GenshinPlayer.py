@@ -36,11 +36,11 @@ class GenshinPlayer:
         self.window.add_page(self.trans_page, "Translation")
         
         self.window.show_page(0)
-        self.current_bpm = 120
 
     def _handle_bpm_change(self, bpm):
         """Handle BPM parameter change"""
-        self.current_bpm = bpm
+        if hasattr(self, "melody"):
+            self.melody[0][2] = bpm
         
     def _handle_instrument_change(self, instrument):
         """Handle instrument change"""
@@ -59,7 +59,7 @@ class GenshinPlayer:
     def _handle_play(self):
         """Handle play button click"""
         self.game.show_window()
-        self.current_instument.play_new_thread(self.melody, self.current_bpm)
+        self.current_instument.play_new_thread(self.melody)
 
     def _handle_pause(self):
         """Handle pause button click"""

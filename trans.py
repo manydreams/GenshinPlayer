@@ -19,20 +19,16 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
                 [time(float), note(str), is_on(bool)] or 
                     [time(float), setbpm(str), bpm(float)],
                 [...], [...], [...],]
-            "bpm": bpm(float)
         }
     """
     if key_map is None:
-        return {'melody': [], 'bpm': None}
+        return {'melody': []}
     ret = []
     mid = MidiFile(file_path)
     
     tempo = 500000
     time_signature = (4, 4)
-
-    f_tempo = None
-    f_time_signature = None
-    
+    ret.append((0.0, "set_bpm", tempo2bpm(tempo, time_signature)))
     
     ofst = offset
     
@@ -53,13 +49,9 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
                     
             elif msg.type == 'time_signature':
                 time_signature = (msg.numerator, msg.denominator)
-                if f_time_signature is None:
-                    f_time_signature = time_signature
                 ret.append((cur/mid.ticks_per_beat, "set_bpm", tempo2bpm(tempo, time_signature)))
             elif msg.type =='set_tempo':
                 tempo = msg.tempo
-                if f_tempo is None:
-                    f_tempo = tempo
                 ret.append((cur/mid.ticks_per_beat, "set_bpm", tempo2bpm(tempo, time_signature)))
             elif msg.type == 'key_signature':
                 offset = ofst + {
@@ -71,11 +63,7 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
     
     
     ret.sort(key=lambda x: x[0])
-    if f_tempo is None:
-        f_tempo = 500000
-    if f_time_signature is None:
-        f_time_signature = (4, 4)
-    return {'melody': ret, 'bpm': tempo2bpm(f_tempo, f_time_signature)}
+    return {'melody': ret}
 
 
 def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
@@ -92,7 +80,6 @@ def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
                 [time(float), note(str), is_on(bool)] or 
                     [time(float), setbpm(str), bpm(float)],
                 [...], [...], [...]]
-            "bpm": bpm(float)
         }
     """
     key_map = {
@@ -120,7 +107,6 @@ def midi_to_ukulele(file_path: str, offset: int = 0) -> dict:
                 [time(float), note(str), is_on(bool)] or 
                     [time(float), setbpm(str), bpm(float)],
                 [...], [...], [...],]
-            "bpm": bpm(float)
         }
     """
     key_map = {
@@ -145,7 +131,6 @@ def midi_to_horn(file_path: str, offset: int = 0) -> dict:
                 [time(float), note(str), is_on(bool)] or 
                     [time(float), setbpm(str), bpm(float)],
                 [...], [...], [...],]
-            "bpm": bpm(float)
         }
     """
     key_map = {

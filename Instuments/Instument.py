@@ -14,7 +14,7 @@ class Instrument:
     def __key_map(self, note: str) -> str:
         return self.__key_map__.get(note, "None")
         
-    def play_new_thread(self, melody: list[(float, str, bool)], bpm: float):
+    def play_new_thread(self, melody: list[(float, str, bool)]):
         if self._play_thread and self._play_thread.is_alive():
             return
             
@@ -22,19 +22,19 @@ class Instrument:
         self._play_event.set()
         self._play_thread = threading.Thread(
             target=self._play_melody,
-            args=(melody, bpm)
+            args=(melody)
         )
         self._play_thread.daemon = True
         self._play_thread.start()
 
-    def play(self, melody: list[(float, str, bool)], bpm: float):
+    def play(self, melody: list[(float, str, bool | float)]):
         self._stop_playback = False
         self._play_event.set()
-        self._play_melody(melody, bpm)
+        self._play_melody(melody)
 
-    def _play_melody(self, melody: list[(float, str, bool)], bpm: float):
+    def _play_melody(self, melody: list[(float, str, bool | float)]):
         self._release_all_keys()
-        time_per_beat = 60 / bpm
+        time_per_beat = 1
         prev_time = 0
 
         for note_time, event, state in melody:
@@ -58,11 +58,6 @@ class Instrument:
                         self.game.key_press(key)
                     else:
                         self.game.key_release(key)
-            # if key != "None":
-            #     if state:
-            #         self.game.key_press(key)
-            #     else:
-            #         self.game.key_release(key)
         self._play_thread = None
         self._release_all_keys()
 

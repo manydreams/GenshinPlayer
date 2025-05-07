@@ -95,19 +95,12 @@ class FilePage(Frame):
     def _handle_file_select(self, file_path: str):
         """Handle file selection"""
         if os.path.isfile(file_path):
+            self.selected_file = file_path
             bpm = None
             melody = None
             if file_path.lower().endswith(('.mid', '.midi')):
                 try:
-                    # Parse and store melody data with current offset
-                    melody_data = trans.midi_to_lyre(file_path, self.current_offset)
-                    if melody_data and 'bpm' in melody_data and melody_data['bpm']:
-                        bpm = melody_data['bpm']
-                    if melody_data and'melody' in melody_data and melody_data['melody']:
-                        melody = melody_data['melody']
-                    self.instrument_combobox.current(2)
-                    self.instrument_combobox.config(state="normal")
-                    self._update_instrument()
+                    self._updata_melody()
                 except Exception as e:
                     messagebox.showerror("Error", f"Error processing MIDI file: {e}\n{e.with_traceback()}")
             elif file_path.lower().endswith('json'):
@@ -118,7 +111,6 @@ class FilePage(Frame):
                         bpm = lyre_config['bpm']
                     if 'melody' in lyre_config and lyre_config['melody']:
                         melody = lyre_config['melody']
-                    
                     if 'instrument' in lyre_config and lyre_config['instrument'] != None:
                         self.instrument_combobox.current(lyre_config['instrument'])
                         self.instrument_combobox.config(state="disabled")
@@ -137,7 +129,6 @@ class FilePage(Frame):
                 self.update_melody(melody)
 
             
-            self.selected_file = file_path
             self.status_label.config(text=f"Selected: {file_path}")
             if melody:
                 self.play_btn.config(state="normal")
@@ -192,8 +183,7 @@ class FilePage(Frame):
         try:
             value = int(self.offset_entry.get())
             self.current_offset = value
-            if hasattr(self, 'selected_file') and self.selected_file.lower().endswith(('.mid', '.midi')):
-                self._updata_melody()
+            self._updata_midi_file()
         except ValueError:
             self.offset_entry.delete(0, "end")
             self.offset_entry.insert(0, str(self.current_offset))
@@ -204,22 +194,30 @@ class FilePage(Frame):
             value = self.instrument_combobox.current()
             if self.on_instrument_change:
                 self.on_instrument_change(value)
-            if hasattr(self, 'selected_file') and self.selected_file.lower().endswith(('.mid', '.midi')):
-                self._updata_melody()
+            self._updata_midi_file()
         except ValueError:
             pass
     
-    def _updata_melody(self):
-        """Update melody data"""
-        if hasattr(self, 'selected_file') and self.selected_file:
-            match self.instrument_combobox.current():
-                case Types.Horn.value:
-                    melody_data = trans.midi_to_horn(self.selected_file, self.current_offset)
-                case Types.Ukulele.value:
-                    melody_data = trans.midi_to_ukulele(self.selected_file, self.current_offset)
-                case Types.Lyre.value:
-                    melody_data = trans.midi_to_lyre(self.selected_file, self.current_offset)
-                case _:
-                    pass
-            if melody_data and 'melody' in melody_data and melody_data['melody']:
-                self.update_melody(melody_data['melody'])
+    def _updata_midi_file(self):
+        """Update midi file melody data"""
+        
+        # Check if file is selected and offset is set
+        if not hasattr(self, 'selected_file') \
+           or not self.selected_file\
+           or not self.selected_file.lower().endswith(('.mid', '.midi'))\
+           or not hasattr(self, 'current_offset')\
+           or not self.current_offset:
+            return
+        
+        # Convert midi file to melody data
+        match self.instrument_combobox.current():
+            case Types.Horn.value:
+                melody_data = trans.midi_to_horn(self.selected_file, self.current_offset)
+            case Types.Ukulele.value:
+                melody_data = trans.midi_to_ukulele(self.selected_file, self.current_offset)
+            case Types.Lyre.value:
+                melody_data = trans.midi_to_lyre(self.selected_file, self.current_offset)
+            case _:
+                pass
+        if melody_data and 'melody' in melody_data and melody_data['melody']:
+            self.update_melody(melody_data['melody'])
