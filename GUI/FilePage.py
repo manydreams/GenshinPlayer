@@ -49,7 +49,7 @@ class FilePage(Frame):
         self._update_bpm()
 
         # Offset control
-        Label(self.param_frame, text="Offset(half step):").pack(side="left")
+        Label(self.param_frame, text="Offset(Semitone):").pack(side="left")
         self.offset_entry = Entry(self.param_frame, width=5)
         self.offset_entry.insert(0, "0")
         self.offset_entry.pack(side="left", padx=5)
@@ -110,6 +110,7 @@ class FilePage(Frame):
                     self._update_instrument()
                 except Exception as e:
                     print(f"Error processing MIDI file: {e}")
+                    print(f"{e.with_traceback()}")
             elif file_path.lower().endswith('json'):
                 try:
                     with open(file_path, 'r') as f:
