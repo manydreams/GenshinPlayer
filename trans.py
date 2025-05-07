@@ -1,6 +1,7 @@
 from mido import MidiFile, MidiTrack, Message, tempo2bpm
 
-def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_map: dict = None) -> dict:
+def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
+                 key_map: dict = None) -> dict:
     """read midi file and return a dict string of melody.
     Args:
         file_path (str): path of the midi file.
@@ -13,8 +14,12 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_m
     Returns:
         a dict like:
         {
-            "melody": [[time(float), note(str), is_on(bool)], [...], [...],...],
-            "bpm": float | None
+            "melody": [
+                [time(float), setbpm(str), bpm(float)],
+                [time(float), note(str), is_on(bool)] or 
+                    [time(float), setbpm(str), bpm(float)],
+                [...], [...], [...],]
+            "bpm": bpm(float)
         }
     """
     if key_map is None:
@@ -22,9 +27,14 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_m
     ret = []
     mid = MidiFile(file_path)
     
-    tempo = None
+    tempo = 500000
     time_signature = (4, 4)
-    bpm = None
+
+    f_tempo = None
+    f_time_signature = None
+    
+    
+    ofst = offset
     
     for t in mid.tracks:
         cur = 0.0
@@ -41,16 +51,31 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True, key_m
                 if msg.type == 'note_off' and not only_press:
                     ret.append((cur/mid.ticks_per_beat, key_map[note], False))
                     
-            elif msg.type == 'time_signature' and time_signature == None:
+            elif msg.type == 'time_signature':
                 time_signature = (msg.numerator, msg.denominator)
-            elif msg.type =='set_tempo' and tempo == None:
+                if f_time_signature is None:
+                    f_time_signature = time_signature
+                ret.append((cur/mid.ticks_per_beat, "set_bpm", tempo2bpm(tempo, time_signature)))
+            elif msg.type =='set_tempo':
                 tempo = msg.tempo
-                
-    if tempo:
-        bpm = tempo2bpm(tempo, time_signature)
-        
+                if f_tempo is None:
+                    f_tempo = tempo
+                ret.append((cur/mid.ticks_per_beat, "set_bpm", tempo2bpm(tempo, time_signature)))
+            elif msg.type == 'key_signature':
+                offset = ofst + {
+                    "C": 0, "C#":-1, "Db": -1, "D": -2, "D#": -3, "Eb": -3,
+                    "E": -4, "F": -5, "F#": -6, "Gb": -6, "G": -7, "G#": -8,
+                    "Ab": -8, "A": -9, "A#": -10, "Bb": -10, "B": -11
+                }[msg.key]
+    
+    
+    
     ret.sort(key=lambda x: x[0])
-    return {'melody': ret, 'bpm': bpm}
+    if f_tempo is None:
+        f_tempo = 500000
+    if f_time_signature is None:
+        f_time_signature = (4, 4)
+    return {'melody': ret, 'bpm': tempo2bpm(f_tempo, f_time_signature)}
 
 
 def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
@@ -62,8 +87,12 @@ def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
     Returns:
         a dict like:
         {
-            "melody": [[time(float), note(str), is_on(bool)], [...], [...],...],
-            "bpm": float | None
+            "melody": [
+                [time(float), setbpm(str), bpm(float)],
+                [time(float), note(str), is_on(bool)] or 
+                    [time(float), setbpm(str), bpm(float)],
+                [...], [...], [...]]
+            "bpm": bpm(float)
         }
     """
     key_map = {
@@ -86,8 +115,12 @@ def midi_to_ukulele(file_path: str, offset: int = 0) -> dict:
     Returns:
         a dict like:
         {
-            "melody": [[time(float), note(str), is_on(bool)], [...], [...],...],
-            "bpm": float | None
+            "melody": [
+                [time(float), setbpm(str), bpm(float)],
+                [time(float), note(str), is_on(bool)] or 
+                    [time(float), setbpm(str), bpm(float)],
+                [...], [...], [...],]
+            "bpm": bpm(float)
         }
     """
     key_map = {
@@ -107,8 +140,12 @@ def midi_to_horn(file_path: str, offset: int = 0) -> dict:
     Returns:
         a dict like:
         {
-            "melody": [[time(float), note(str), is_on(bool)], [...], [...],...],
-            "bpm": float | None
+            "melody": [
+                [time(float), setbpm(str), bpm(float)],
+                [time(float), note(str), is_on(bool)] or 
+                    [time(float), setbpm(str), bpm(float)],
+                [...], [...], [...],]
+            "bpm": bpm(float)
         }
     """
     key_map = {
