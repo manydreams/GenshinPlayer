@@ -1,6 +1,11 @@
 {
     "melody": [
         [
+            0.0,
+            "set_bpm",
+            86
+        ],
+        [
             1.0,
             "A4",
             true
@@ -4191,6 +4196,5 @@
             false
         ]
     ],
-    "bpm": 86,
     "instrument": 2
 }

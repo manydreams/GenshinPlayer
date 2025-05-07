@@ -2,6 +2,11 @@
     "melody": [
         [
             0,
+            "set_bpm",
+            120
+        ],
+        [
+            0,
             "C6",
             true
         ],
@@ -421,6 +426,5 @@
             false
         ]
     ],
-    "bpm": 120,
     "instrument": 0
 }

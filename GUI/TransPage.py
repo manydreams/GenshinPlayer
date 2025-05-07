@@ -100,13 +100,14 @@ class TransPage(Frame):
                 offset = int(self.offset_entry.get())
                 match self.selected_instrument:
                     case Types.Horn.value:
-                        self.result = trans.midi_to_horn(self.selected_file, offset)
+                        rst = trans.midi_to_horn(self.selected_file, offset)
                     case Types.Ukulele.value:
-                        self.result = trans.midi_to_ukulele(self.selected_file, offset)
+                        rst = trans.midi_to_ukulele(self.selected_file, offset)
                     case Types.Lyre.value:
-                        self.result = trans.midi_to_lyre(self.selected_file, offset)
+                        rst = trans.midi_to_lyre(self.selected_file, offset)
                     case _:
                         pass
+                self.result = {'melody': rst}
                 self.result['instrument'] = self.selected_instrument
                 
                 self.result_text.config(state="normal")

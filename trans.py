@@ -1,7 +1,8 @@
 from mido import MidiFile, MidiTrack, Message, tempo2bpm
 
 def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
-                 key_map: dict = None) -> dict:
+                 key_map: dict = None)\
+        -> list[tuple[float, str, bool|float]]:
     """read midi file and return a dict string of melody.
     Args:
         file_path (str): path of the midi file.
@@ -9,26 +10,27 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
         only_press (bool): 
             - if True, record pressing and releasing keys when note_on.
             - if False, record all notes.
-        key_map (dict): the key map of the midi file.
+        key_map (list): the key map of the midi file.
     
     Returns:
-        a dict like:
-        {
-            "melody": [
-                [time(float), setbpm(str), bpm(float)],
-                [time(float), note(str), is_on(bool)] or 
-                    [time(float), setbpm(str), bpm(float)],
-                [...], [...], [...],]
-        }
+        a list like:
+        [
+            [time(float), setbpm(str), bpm(float)],
+            [time(float), note(str), is_on(bool)] 
+                or [time(float), setbpm(str), bpm(float)],
+            [...], [...], [...],
+        ]
+    
     """
     if key_map is None:
         return {'melody': []}
-    ret = []
+    ret: list[tuple[float, str, bool|float]] = []
     mid = MidiFile(file_path)
     
     tempo = 500000
     time_signature = (4, 4)
     ret.append((0.0, "set_bpm", tempo2bpm(tempo, time_signature)))
+    first_bpm = True
     
     ofst = offset
     
@@ -53,6 +55,9 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
             elif msg.type =='set_tempo':
                 tempo = msg.tempo
                 ret.append((cur/mid.ticks_per_beat, "set_bpm", tempo2bpm(tempo, time_signature)))
+                if first_bpm:
+                    ret[0] = (ret[0][0], ret[0][1], tempo2bpm(tempo, time_signature))
+                    first_bpm = False
             elif msg.type == 'key_signature':
                 offset = ofst + {
                     "C": 0, "C#":-1, "Db": -1, "D": -2, "D#": -3, "Eb": -3,
@@ -63,24 +68,24 @@ def __midi_trans(file_path: str, offset: int = 0, only_press: bool = True,
     
     
     ret.sort(key=lambda x: x[0])
-    return {'melody': ret}
+    return ret
 
 
-def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
+def midi_to_lyre(file_path: str, offset: int = 0) \
+        -> list[tuple[float, str, bool|float]]:
     """read midi file and return a dict string of melody.
     Args:
         file_path (str): path of the midi file.
         offset (int): the offset of the midi file.
     
     Returns:
-        a dict like:
-        {
-            "melody": [
-                [time(float), setbpm(str), bpm(float)],
-                [time(float), note(str), is_on(bool)] or 
-                    [time(float), setbpm(str), bpm(float)],
-                [...], [...], [...]]
-        }
+        a list like:
+        [
+            [time(float), setbpm(str), bpm(float)],
+            [time(float), note(str), is_on(bool)] 
+                or [time(float), setbpm(str), bpm(float)],
+            [...], [...], [...],
+        ]
     """
     key_map = {
         48: 'C4', 50: 'D4', 52: 'E4', 53: 'F4',
@@ -93,21 +98,21 @@ def midi_to_lyre(file_path: str, offset: int = 0) -> dict:
     
     return __midi_trans(file_path, offset, only_press=True, key_map=key_map)
 
-def midi_to_ukulele(file_path: str, offset: int = 0) -> dict:
+def midi_to_ukulele(file_path: str, offset: int = 0)\
+        -> list[tuple[float, str, bool|float]]:
     """read midi file and return a dict string of melody.
     Args:
         file_path (str): path of the midi file.
         offset (int): the offset of the midi file.
     
     Returns:
-        a dict like:
-        {
-            "melody": [
-                [time(float), setbpm(str), bpm(float)],
-                [time(float), note(str), is_on(bool)] or 
-                    [time(float), setbpm(str), bpm(float)],
-                [...], [...], [...],]
-        }
+        a list like:
+        [
+            [time(float), setbpm(str), bpm(float)],
+            [time(float), note(str), is_on(bool)] 
+                or [time(float), setbpm(str), bpm(float)],
+            [...], [...], [...],
+        ]
     """
     key_map = {
         60: 'C5', 62: 'D5', 64: 'E5', 65: 'F5',
@@ -117,21 +122,21 @@ def midi_to_ukulele(file_path: str, offset: int = 0) -> dict:
     }
     return __midi_trans(file_path, offset, only_press=True, key_map=key_map)
 
-def midi_to_horn(file_path: str, offset: int = 0) -> dict:
+def midi_to_horn(file_path: str, offset: int = 0)\
+        -> list[tuple[float, str, bool|float]]:
     """read midi file and return a dict string of melody.
     Args:
         file_path (str): path of the midi file.
         offset (int): the offset of the midi file.
     
     Returns:
-        a dict like:
-        {
-            "melody": [
-                [time(float), setbpm(str), bpm(float)],
-                [time(float), note(str), is_on(bool)] or 
-                    [time(float), setbpm(str), bpm(float)],
-                [...], [...], [...],]
-        }
+        a list like:
+        [
+            [time(float), setbpm(str), bpm(float)],
+            [time(float), note(str), is_on(bool)] 
+                or [time(float), setbpm(str), bpm(float)],
+            [...], [...], [...],
+        ]
     """
     key_map = {
         48: 'C4', 50: 'D4', 52: 'E4', 53: 'F4',

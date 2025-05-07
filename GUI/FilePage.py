@@ -94,43 +94,37 @@ class FilePage(Frame):
 
     def _handle_file_select(self, file_path: str):
         """Handle file selection"""
+        get_melody = False
+        
         if os.path.isfile(file_path):
             self.selected_file = file_path
-            bpm = None
-            melody = None
             if file_path.lower().endswith(('.mid', '.midi')):
                 try:
-                    self._updata_melody()
+                    get_melody = self._updata_midi_file()
                 except Exception as e:
-                    messagebox.showerror("Error", f"Error processing MIDI file: {e}\n{e.with_traceback()}")
+                    messagebox.showerror("Error", f"Error processing MIDI file:\n\t{e}")
             elif file_path.lower().endswith('json'):
                 try:
                     with open(file_path, 'r') as f:
                         lyre_config = json.load(f)
-                    if 'bpm' in lyre_config and lyre_config['bpm']:
-                        bpm = lyre_config['bpm']
                     if 'melody' in lyre_config and lyre_config['melody']:
                         melody = lyre_config['melody']
+                        self.bpm_entry.delete(0, tk.END)
+                        self.bpm_entry.insert(0, str(melody[0][2]))
+                        self.update_melody(melody)
+                        get_melody = True
                     if 'instrument' in lyre_config and lyre_config['instrument'] != None:
                         self.instrument_combobox.current(lyre_config['instrument'])
                         self.instrument_combobox.config(state="disabled")
                         self._update_instrument()
                 except Exception as e:
-                    messagebox.showerror("Error", f"Error processing JSON file: {e}\n{e.with_traceback()}")
+                    messagebox.showerror("Error", f"Error processing JSON file:\n\t{e}")
                     self.instrument_combobox.current(2)
                     self.instrument_combobox.config(state="normal")
                     self._update_instrument()
             
-            if bpm:
-                self.bpm_entry.delete(0, tk.END)
-                self.bpm_entry.insert(0, str(bpm))
-                self._update_bpm()
-            if melody:
-                self.update_melody(melody)
-
-            
             self.status_label.config(text=f"Selected: {file_path}")
-            if melody:
+            if get_melody:
                 self.play_btn.config(state="normal")
             else:
                 self.play_btn.config(state="disabled")
@@ -198,7 +192,7 @@ class FilePage(Frame):
         except ValueError:
             pass
     
-    def _updata_midi_file(self):
+    def _updata_midi_file(self) -> bool:
         """Update midi file melody data"""
         
         # Check if file is selected and offset is set
@@ -206,18 +200,23 @@ class FilePage(Frame):
            or not self.selected_file\
            or not self.selected_file.lower().endswith(('.mid', '.midi'))\
            or not hasattr(self, 'current_offset')\
-           or not self.current_offset:
-            return
+           or not isinstance(self.current_offset, int):
+            return False
         
         # Convert midi file to melody data
         match self.instrument_combobox.current():
             case Types.Horn.value:
-                melody_data = trans.midi_to_horn(self.selected_file, self.current_offset)
+                melody = trans.midi_to_horn(self.selected_file, self.current_offset)
             case Types.Ukulele.value:
-                melody_data = trans.midi_to_ukulele(self.selected_file, self.current_offset)
+                melody = trans.midi_to_ukulele(self.selected_file, self.current_offset)
             case Types.Lyre.value:
-                melody_data = trans.midi_to_lyre(self.selected_file, self.current_offset)
+                melody = trans.midi_to_lyre(self.selected_file, self.current_offset)
             case _:
                 pass
-        if melody_data and 'melody' in melody_data and melody_data['melody']:
-            self.update_melody(melody_data['melody'])
+        if melody:
+            self.update_melody(melody)
+            self.bpm_entry.delete(0, tk.END)
+            self.bpm_entry.insert(0, str(melody[0][2]))
+            return True
+        else:
+            return False
