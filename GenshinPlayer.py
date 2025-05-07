@@ -78,4 +78,5 @@ class GenshinPlayer:
         """Start the application"""
         self.window = Viewer(title="Genshin Lyre Player")
         self._setup_main_page()
-        input("Press any key to exit...")
+        self.window.mainloop()
+        

@@ -19,8 +19,6 @@ class Viewer(Tk):
         # Page management
         self.pages = []
         self.current_page = None
-        
-        self.__mainloop()
 
     def add_page(self, page_frame: Frame, title: str):
         """Add a new page to the viewer"""
@@ -40,8 +38,3 @@ class Viewer(Tk):
         self.current_page = self.pages[index]
         self.current_page.pack(in_=self.page_container, fill="both", expand=True)
         self.sidebar.set_active_button(index)
-
-    def __mainloop(self):
-        self.after(0, self.__mainloop)
-        self.update()
-        
