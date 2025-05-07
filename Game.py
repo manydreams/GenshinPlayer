@@ -36,8 +36,7 @@ class Game:
             win32gui.ShowWindow(self.game_window_hwnd, win32con.SW_RESTORE)
             win32gui.SetForegroundWindow(self.game_window_hwnd)
         except Exception as e:
-            print(f"Window activation error: {e}")
-            raise
+            raise e
     
     def key_press(self, key: str) -> None:
         """Sends a key press event to the game window.
@@ -51,8 +50,7 @@ class Game:
             lparam = (scan_code << 16) | 1
             win32gui.PostMessage(self.game_window_hwnd, win32con.WM_KEYDOWN, vk_code, lparam)
         except Exception as e:
-            print(f"Background key press error: {e}")
-            raise
+            raise e
     
     def key_release(self, key: str) -> None:
         """Sends a key release event to the game window.
@@ -66,7 +64,6 @@ class Game:
             lparam = (scan_code << 16) | 0xC0000001
             win32gui.PostMessage(self.game_window_hwnd, win32con.WM_KEYUP, vk_code, lparam)
         except Exception as e:
-            print(f"Background key release error: {e}")
-            raise
+            raise e
 
         

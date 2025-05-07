@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Button, Entry, ttk
+from tkinter import Frame, Label, Button, Entry, ttk, messagebox
 from .FileSelector import FileSelector
 from Instuments.Types import Types
 
@@ -109,8 +109,7 @@ class FilePage(Frame):
                     self.instrument_combobox.config(state="normal")
                     self._update_instrument()
                 except Exception as e:
-                    print(f"Error processing MIDI file: {e}")
-                    print(f"{e.with_traceback()}")
+                    messagebox.showerror("Error", f"Error processing MIDI file: {e}\n{e.with_traceback()}")
             elif file_path.lower().endswith('json'):
                 try:
                     with open(file_path, 'r') as f:
@@ -125,7 +124,7 @@ class FilePage(Frame):
                         self.instrument_combobox.config(state="disabled")
                         self._update_instrument()
                 except Exception as e:
-                    print("Error loading music score:", e)
+                    messagebox.showerror("Error", f"Error processing JSON file: {e}\n{e.with_traceback()}")
                     self.instrument_combobox.current(2)
                     self.instrument_combobox.config(state="normal")
                     self._update_instrument()
