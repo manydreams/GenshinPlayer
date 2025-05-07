@@ -22,7 +22,7 @@ class Instrument:
         self._play_event.set()
         self._play_thread = threading.Thread(
             target=self._play_melody,
-            args=(melody)
+            args=(melody,)
         )
         self._play_thread.daemon = True
         self._play_thread.start()
