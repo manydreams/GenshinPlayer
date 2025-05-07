@@ -6,7 +6,6 @@ from Instuments.Ukulele import Ukulele
 from Instuments.NightwindHorn import NightwindHorn
 from Instuments.Types import Types
 from Game import Game
-import trans
 
 
 class GenshinPlayer:
