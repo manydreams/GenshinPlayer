@@ -101,6 +101,7 @@ class FilePage(Frame):
             if file_path.lower().endswith(('.mid', '.midi')):
                 try:
                     get_melody = self._updata_midi_file()
+                    self.instrument_combobox.config(state="normal")
                 except Exception as e:
                     messagebox.showerror("Error", f"Error processing MIDI file:\n\t{e}")
             elif file_path.lower().endswith('json'):
@@ -168,6 +169,17 @@ class FilePage(Frame):
             value = float(self.bpm_entry.get())
             if self.on_bpm_change:
                 self.on_bpm_change(value)
+            if self.is_playing:
+                self.is_playing = False
+            if self.is_paused:
+                self.is_paused = False
+            self.on_stop()
+            if hasattr(self, 'play_btn'):
+                self.play_btn.config(state="normal")
+            if hasattr(self, 'pause_btn'):
+                self.pause_btn.config(state="disabled")
+            if hasattr(self,'resume_btn'):
+                self.resume_btn.config(state="disabled")
         except ValueError:
             self.bpm_entry.delete(0, tk.END)        
 
@@ -178,6 +190,17 @@ class FilePage(Frame):
             value = int(self.offset_entry.get())
             self.current_offset = value
             self._updata_midi_file()
+            if self.is_playing:
+                self.is_playing = False
+            if self.is_paused:
+                self.is_paused = False
+            self.on_stop()
+            if hasattr(self, 'play_btn'):
+                self.play_btn.config(state="normal")
+            if hasattr(self, 'pause_btn'):
+                self.pause_btn.config(state="disabled")
+            if hasattr(self,'resume_btn'):
+                self.resume_btn.config(state="disabled")
         except ValueError:
             self.offset_entry.delete(0, "end")
             self.offset_entry.insert(0, str(self.current_offset))
@@ -188,12 +211,27 @@ class FilePage(Frame):
             value = self.instrument_combobox.current()
             if self.on_instrument_change:
                 self.on_instrument_change(value)
-            self._updata_midi_file()
+            if self._updata_midi_file():
+                if self.is_playing:
+                    self.is_playing = False
+                if self.is_paused:
+                    self.is_paused = False
+                self.on_stop()
+                if hasattr(self, 'play_btn'):
+                    self.play_btn.config(state="normal")
+                if hasattr(self, 'pause_btn'):
+                    self.pause_btn.config(state="disabled")
+                if hasattr(self,'resume_btn'):
+                    self.resume_btn.config(state="disabled")
+            
         except ValueError:
             pass
     
     def _updata_midi_file(self) -> bool:
-        """Update midi file melody data"""
+        """Update midi file melody data
+            Returns:
+                bool: True if melody data is updated, False otherwise
+        """
         
         # Check if file is selected and offset is set
         if not hasattr(self, 'selected_file') \
