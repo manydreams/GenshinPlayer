@@ -40,7 +40,7 @@ class GenshinPlayer:
     def _handle_bpm_change(self, bpm):
         """Handle BPM parameter change"""
         if hasattr(self, "melody"):
-            self.melody[0][2] = bpm
+            self.melody[0] = (self.melody[0][0], self.melody[0][1], bpm)
         
     def _handle_instrument_change(self, instrument):
         """Handle instrument change"""
